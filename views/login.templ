@@ -1,0 +1,66 @@
+package views
+
+templ Login() {
+	@layout() {
+		<main class="pt-40">
+			<section class="card w-fit bg-base-200 shadow-xl mx-auto mb-8">
+				<div class="card-body pb-2">
+					<h1 class="card-title border-b border-b-slate-600 pb-[4px]">
+						Log In
+					</h1>
+					<form
+						hx-swap="transition:true"
+						hx-headers="js:{'X-TimeZone': Intl.DateTimeFormat().resolvedOptions().timeZone}"
+						hx-post="/login"
+						hx-target="body"
+						hx-target-error="#feedback"
+						hx-push-url="true"
+						hx-indicator="#spinner"
+						class="rounded-xl drop-shadow-xl flex flex-col gap-4 w-96 p-8"
+					>
+						<label class="flex flex-col justify-start gap-2">
+							Email:
+							<input
+								class="input input-bordered input-primary bg-slate-800"
+								type="email"
+								name="email"
+								autofocus
+							/>
+						</label>
+						<label class="flex flex-col justify-start gap-2 relative">
+							Password:
+							<input
+								class="input input-bordered input-primary bg-slate-800"
+								type="password"
+								name="password"
+							/>
+							<button
+								title="View password"
+								type="button"
+								class="absolute top-12 right-3"
+								_="on click if [type of previous <input/>] == 'password' then remove [@type=password] from previous <input/> then hide #eye then remove .hidden from #eye-slash else show #eye then add .hidden to #eye-slash then tell previous <input/> toggle [@type=password] end"
+							>
+								<img id="eye" src="/img/eye.svg" alt="eye icon"/>
+								<img id="eye-slash" class="hidden" src="/img/eye-slash.svg" alt="eye slash icon"/>
+							</button>
+						</label>
+						<footer class="card-actions justify-end">
+							<button type="submit" class="text-xs md:text-base badge badge-primary px-6 py-4 hover:scale-[1.1]">
+								Sign In
+								<span
+									id="spinner"
+									class="my-indicator ml-3 loading loading-spinner loading-xs text-fuchsia-700"
+								></span>
+							</button>
+						</footer>
+						<div
+							_="on click transition opacity to 0 then put '' into me then transition opacity to 1"
+							id="feedback"
+							class="cursor-pointer text-xs text-red-700 h-4"
+						></div>
+					</form>
+				</div>
+			</section>
+		</main>
+	}
+}

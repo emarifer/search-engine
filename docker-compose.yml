@@ -1,0 +1,75 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:alpine
+    container_name: search-engine
+    ports:
+      - 5432:5432
+    volumes:
+      - ./_app_data:/var/lib/postgresql/data
+    env_file:
+      - ./.env
+
+# IMPORTANTE: Si el volumen va a estar dentro de la carpeta de la
+# aplicación será conveniente darle al volumen un numbre precedido por "_",
+# porque así Go lo ignorará y no dará problemas (en los test, descarga de
+# paquetes, etc.)
+
+# docker compose up -d
+# docker container start search-engine
+# docker container stop search-engine
+# docker exec -it search-engine psql -U postgres
+# (pass: without password & default user [postgres])
+
+# Listing databases in PostgreSQL: \l or \l+
+# Connect to the "search" database as user "postgres": \c search
+# [https://stackoverflow.com/questions/10335561/use-database-name-command-in-postgresql]
+# Showing tables from PostgreSQL: \dt
+# PostgreSQL DESCRIBE TABLE using psql: \d table_name (\d users)
+# Listing table contents: select * from users;
+# SQL Delete Records within a specific Range. VER:
+# delete from users where id between 7 and 15;
+# https://stackoverflow.com/questions/8225036/sql-delete-records-within-a-specific-range
+# delete from account where id between 31 and 33;
+# Exit the database: \q
+
+# Trust Authentication (default user `postgres`, wihtout password):
+# https://www.postgresql.org/docs/current/auth-trust.htm
+# https://hub.docker.com/_/postgres (find `POSTGRES_HOST_AUTH_METHOD`)
+# Since it is the OS that connects, the username that
+# connects to localhost is `yourusername`. Therefore,
+# in `DATABASE_URL` you must place the default user (`postgres`):
+# DATABASE_URL=postgresql://postgres@localhost:5432/search
+# References:
+# https://dba.stackexchange.com/questions/205144/how-do-i-login-to-a-postgres-database-without-a-password
+
+# INSERT A TEST RECORD:
+# INSERT INTO search_settings (id, search_on, add_new, amount, updated_at) 
+# VALUES (1, 'f', 't', 25, current_timestamp);
+# INSERT INTO crawled_urls (url) VALUES ('https://www.ytsruh.com/');
+# INSERT INTO crawled_urls (url) VALUES ('https://matgomes.com/');
+
+# UPDATE A RECORD:
+# UPDATE search_settings SET search_on = 't' WHERE id = 1;
+# UPDATE search_settings
+# SET search_on = 't',
+#  add_new = 't',
+#  amount = 10
+# WHERE id = 1;
+
+# DELETE FROM crawled_urls WHERE url NOT IN ('https://www.ytsruh.com/');
+
+# SELECT COUNT(*) FROM crawled_urls ;
+
+# PostgreSQL Foreign Key:
+# https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-foreign-key/
+
+# How to Set a TIMESTAMP as a Default Column Value in PostgreSQL:
+# https://www.commandprompt.com/education/how-to-set-a-timestamp-as-a-default-column-value-in-postgresql/
+
+# USING INDEXES TO SPEED UP QUERIES IN POSTGRESQL:
+# https://niallburkley.com/blog/index-columns-for-like-in-postgres/
+
+# Examine the performance of an "ILIKE" query (e.g.):
+# EXPLAIN ANALYSE SELECT * FROM links WHERE description ILIKE '%Sil%' AND user_id='e42e4f12-c647-4d87-b47c-18fc8529e3f1';

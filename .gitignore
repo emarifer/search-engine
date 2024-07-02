@@ -1,0 +1,9 @@
+tmp
+bin
+
+
+**/*_templ.go
+assets/css/main.css
+
+_app_data
+tailwind/node_modules
