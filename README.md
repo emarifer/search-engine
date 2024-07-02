@@ -21,6 +21,18 @@
 
 <hr />
 
+## 🖼️ Screenshots:
+
+<div align="center">
+
+###### Admin login screen and dashboard:
+
+<img src="assets/img/screenshot-01.png" width="26%" align="top">&nbsp;&nbsp;<img src="assets/img/screenshot-02.png" width="26%" align="top">
+
+</div>
+
+---
+
 ## 👨‍🚀 Installation and Usage
 
 Before compiling the view templates, you'll need to regenerate the CSS. First, you need to install the dependencies required by `Tailwind CSS` and `daisyUI` (you must have `Node.js` installed on your system) and then run the regeneration of the `main.css` file. To do this, apply the following commands:
