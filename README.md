@@ -30,8 +30,8 @@
 - [x] **SQL Database Integration:** Storing crawled urls and indexing results in a `Postgres` DB, which allows greater scalability and efficiency in searches.
 - [x] **Caching of the responses (in `JSON` format) of the searches performed:** The `Fiber` framework provides [middleware](https://docs.gofiber.io/api/middleware/cache) for easy caching of server responses.
 - [x] **Using the `Fiber` framework, `A-H/Templ` and `Htmx` libraries::** The use of [Fiber](https://gofiber.io/), [Templ](https://templ.guide/) and [Htmx](https://htmx.org/) greatly speeds up the creation of a simple user interface for minimal search engine administration. Check out some of my other [repositories](https://github.com/emarifer/gofiber-templ-htmx) for more explanations.
-- [] **Using interfaces in the `services` package:** The architecture follows a typical "onion model" where each layer doesn't know about the layer above it, and each layer is responsible for a specific thing, in this case, the `services` (package) layer, which allows for better separation of responsibilities and `dependency injection`.
-- [] **Using concurrency in engine-built crawling functions:** Use is made of one of the features in which the Go language shines most: concurrency, to try to speed up the always heavy link crawling tasks. 🚧 This is a work in progress.
+- [ ] **Using interfaces in the `services` package:** The architecture follows a typical "onion model" where each layer doesn't know about the layer above it, and each layer is responsible for a specific thing, in this case, the `services` (package) layer, which allows for better separation of responsibilities and `dependency injection`.
+- [ ] **Using concurrency in engine-built crawling functions:** Use is made of one of the features in which the Go language shines most: concurrency, to try to speed up the always heavy link crawling tasks. 🚧 This is a work in progress.
 
 <br />
 
