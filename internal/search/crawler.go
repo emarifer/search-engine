@@ -32,6 +32,7 @@ type Links struct {
 	External []string
 }
 
+// ↓ SEE LIST IN NOTE BELOW ↓
 var userAgents = []string{
 	"Mozilla/5.0 (Linux; U; Android 4.0.3; en-us; KFTT Build/IML74K) AppleWebKit/537.36 (KHTML, like Gecko) Silk/3.68 like Chrome/39.0.2171.93 Safari/537.36",
 	"Mozilla/5.0 (iPad; CPU OS 8_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12D508 Safari/600.1.4",
@@ -144,17 +145,25 @@ func parseBody(body io.Reader, baseUrl *url.URL) (ParsedBody, error) {
 		return ParsedBody{}, err
 	}
 
+	linksch, titlech, descch, headingsch :=
+		make(chan Links),
+		make(chan string),
+		make(chan string),
+		make(chan string)
+
 	// Record timings
 	start := time.Now()
 
 	// Get the links from the doc
-	links := getLinks(doc, baseUrl)
+	go getLinks(doc, baseUrl, linksch)
 
 	// Get the page title & description
-	title, desc := getPageData(doc)
+	go getPageData(doc, titlech, descch)
 
 	// Get the h1 tags for the page
-	headings := getPageHeadings(doc)
+	go getPageHeadings(doc, headingsch)
+
+	links, title, desc, headings := <-linksch, <-titlech, <-descch, <-headingsch
 
 	// Record timings
 	end := time.Now()
@@ -197,10 +206,11 @@ func checkUrlKind(url *url.URL) bool {
 // getLinks does a Depth First Search (DFS) of the html tree structure.
 // This is a recursive function to scan the full tree.
 // ↓ See note below about Depth-First Search (DFS) algorithm ↓
-func getLinks(n *html.Node, baseUrl *url.URL) Links {
+func getLinks(n *html.Node, baseUrl *url.URL, lch chan Links) {
 	links := Links{}
 	if n == nil {
-		return links
+		lch <- links
+		return
 	}
 
 	// Recursive search for "a" tags in the DOM tree
@@ -255,13 +265,15 @@ func getLinks(n *html.Node, baseUrl *url.URL) Links {
 	// We call the previously defined function
 	findLinks(n)
 
-	return links
+	lch <- links
 }
 
-func getPageData(n *html.Node) (string, string) {
+func getPageData(n *html.Node, tch, dch chan string) {
 	title, desc := "", ""
 	if n == nil {
-		return title, desc
+		tch <- title
+		dch <- desc
+		return
 	}
 
 	// Find the page title & description
@@ -300,12 +312,14 @@ func getPageData(n *html.Node) (string, string) {
 	// We call the previously defined function
 	findMetaAndTitle(n)
 
-	return title, desc
+	tch <- title
+	dch <- desc
 }
 
-func getPageHeadings(n *html.Node) string {
+func getPageHeadings(n *html.Node, hch chan string) {
 	if n == nil {
-		return ""
+		hch <- ""
+		return
 	}
 
 	// Find all h1 elements and concatenate their content
@@ -334,7 +348,7 @@ func getPageHeadings(n *html.Node) string {
 
 	// Remove the last comma and space
 	// from the concatenated string & return
-	return strings.TrimSuffix(headings.String(), ", ")
+	hch <- strings.TrimSuffix(headings.String(), ", ")
 }
 
 /* DEPTH-FIRST SEARCH ALGORITHM IN GO:

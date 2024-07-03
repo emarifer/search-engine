@@ -115,8 +115,12 @@ func TestGetLinks(t *testing.T) {
 	}
 	expectedExternal := []string{"https://external.com"}
 
+	linksch := make(chan Links)
+
 	// Call the function `getLinks`
-	result := getLinks(doc, baseUrl)
+	go getLinks(doc, baseUrl, linksch)
+
+	result := <-linksch
 
 	// Compare the internal links result with the expected value
 	if !equalSlices(result.Internal, expectedInternal) {
@@ -202,8 +206,12 @@ func TestGetPageData(t *testing.T) {
 	expectedTitle := "Page Title"
 	expectedDesc := "Page Description"
 
+	titlech, descch := make(chan string), make(chan string)
+
 	// Call the function `getPageData`
-	resultTitle, resultDesc := getPageData(doc)
+	go getPageData(doc, titlech, descch)
+
+	resultTitle, resultDesc := <-titlech, <-descch
 
 	// Compare the title result with the expected value
 	if resultTitle != expectedTitle {
@@ -237,8 +245,12 @@ func TestGetPageHeadings(t *testing.T) {
 
 	expected := "Heading 1, Heading 2"
 
+	headingsch := make(chan string)
+
 	// Call the function `getPageHeadings`
-	result := getPageHeadings(doc)
+	go getPageHeadings(doc, headingsch)
+
+	result := <-headingsch
 
 	// Compare the result with the expected value
 	if result != expected {

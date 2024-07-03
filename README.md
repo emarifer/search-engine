@@ -2,7 +2,7 @@
   
 <h1 align="center">Search Engine</h1>
 
-<img src="./assets/img/logo-doc.png" height="200">
+<img src="./assets/img/logo-doc.png" width="55%">
 
 <hr />
 
@@ -21,6 +21,22 @@
 
 <hr />
 
+## Features 🚀
+
+- [x] **Golang-Powered:** Leverage the performance and safety of one of the
+  best languages in the market for backend development.
+- [x] **Search engine based on the `Depth-first search (DFS)` algorithm:** [Depth-first search](https://www.geeksforgeeks.org/depth-first-search-or-dfs-for-a-graph/) is an algorithm for traversing or searching tree or graph data structures, as is the case with HTML documents. To avoid processing the same link more than once, a `unique` constraint is used when storing the urls that will be crawled in subsequent cycles.
+- [x] **Indexing `full text search`:** It is carried out using a parser/tokenizer that uses the [Snowball](https://github.com/kljensen/snowball) library and implemented an [inverted index](https://www.geeksforgeeks.org/inverted-index/), which is stored in the database, allowing an efficient query of the terms search.
+- [x] **SQL Database Integration:** Storing crawled urls and indexing results in a `Postgres` DB, which allows greater scalability and efficiency in searches.
+- [x] **Caching of the responses (in `JSON` format) of the searches performed:** The `Fiber` framework provides [middleware](https://docs.gofiber.io/api/middleware/cache) for easy caching of server responses.
+- [x] **Using the `Fiber` framework, `A-H/Templ` and `Htmx` libraries::** The use of [Fiber](https://gofiber.io/), [Templ](https://templ.guide/) and [Htmx](https://htmx.org/) greatly speeds up the creation of a simple user interface for minimal search engine administration. Check out some of my other [repositories](https://github.com/emarifer/gofiber-templ-htmx) for more explanations.
+- [] **Using interfaces in the `services` package:** The architecture follows a typical "onion model" where each layer doesn't know about the layer above it, and each layer is responsible for a specific thing, in this case, the `services` (package) layer, which allows for better separation of responsibilities and `dependency injection`.
+- [] **Using concurrency in engine-built crawling functions:** Use is made of one of the features in which the Go language shines most: concurrency, to try to speed up the always heavy link crawling tasks. 🚧 This is a work in progress.
+
+<br />
+
+<hr />
+
 ## 🖼️ Screenshots:
 
 <div align="center">
@@ -29,7 +45,14 @@
 
 <img src="assets/img/screenshot-01.png" width="26%" align="top">&nbsp;&nbsp;<img src="assets/img/screenshot-02.png" width="26%" align="top">
 
+
+###### Response to a search performed with cURL:
+
+<img src="assets/img/screenshot-03.png" width="55%" align="top">
+
+
 </div>
+
 
 ---
 

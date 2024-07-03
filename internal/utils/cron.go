@@ -15,12 +15,18 @@ func StartCronJobs(
 ) {
 	c := cron.New()
 	// "0 * * * *" Run every hour
-	c.AddFunc("35 * * * *", func() { search.RunEngine(sss, us) }) // @every 120s
+	c.AddFunc("51 * * * *", func() { search.RunEngine(sss, us) }) // @every 120s
 	// "" Run every hour at 15 minutes past
-	c.AddFunc("37 * * * *", func() { search.RunIndex(us, sis) }) // @every 30s
+	c.AddFunc("52 * * * *", func() { search.RunIndex(us, sis) }) // @every 30s
 
-	// c.AddFunc("38 * * * *", func() { search.RunEngine(sss, us) })
-	// c.AddFunc("40 * * * *", func() { search.RunIndex(us, sis) })
+	// c.AddFunc("53 * * * *", func() { search.RunEngine(sss, us) })
+	// c.AddFunc("54 * * * *", func() { search.RunIndex(us, sis) })
+
+	// c.AddFunc("55 * * * *", func() { search.RunEngine(sss, us) })
+	// c.AddFunc("56 * * * *", func() { search.RunIndex(us, sis) })
+
+	// c.AddFunc("57 * * * *", func() { search.RunEngine(sss, us) })
+	// c.AddFunc("58 * * * *", func() { search.RunIndex(us, sis) })
 
 	c.Start()
 	cronCount := len(c.Entries())
