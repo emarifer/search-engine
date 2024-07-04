@@ -13,6 +13,7 @@ import (
 )
 
 type CrawlData struct {
+	ID           string
 	Url          string
 	Success      bool
 	ResponseCode int
@@ -71,7 +72,7 @@ func makeRequest(url string) (*http.Response, error) {
 	return res, nil
 }
 
-func runCrawl(inputUrl string) CrawlData {
+func runCrawl(id, inputUrl string) CrawlData {
 	// resp, err := http.Get(inputUrl)
 	resp, err := makeRequest(inputUrl)
 	baseUrl, _ := url.Parse(inputUrl)
@@ -79,6 +80,7 @@ func runCrawl(inputUrl string) CrawlData {
 		log.Printf("something went wrong fetch the body: %s\n", err)
 
 		return CrawlData{
+			ID:           id,
 			Url:          inputUrl,
 			Success:      false,
 			ResponseCode: 0,
@@ -92,6 +94,7 @@ func runCrawl(inputUrl string) CrawlData {
 		log.Printf("non 200 code found: %d\n", resp.StatusCode)
 
 		return CrawlData{
+			ID:           id,
 			Url:          inputUrl,
 			Success:      false,
 			ResponseCode: resp.StatusCode,
@@ -110,6 +113,7 @@ func runCrawl(inputUrl string) CrawlData {
 			)
 
 			return CrawlData{
+				ID:           id,
 				Url:          inputUrl,
 				Success:      false,
 				ResponseCode: resp.StatusCode,
@@ -118,6 +122,7 @@ func runCrawl(inputUrl string) CrawlData {
 		}
 
 		return CrawlData{
+			ID:           id,
 			Url:          inputUrl,
 			Success:      true,
 			ResponseCode: resp.StatusCode,
@@ -129,6 +134,7 @@ func runCrawl(inputUrl string) CrawlData {
 		log.Println("non html response detected")
 
 		return CrawlData{
+			ID:           id,
 			Url:          inputUrl,
 			Success:      false,
 			ResponseCode: resp.StatusCode,

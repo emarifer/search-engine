@@ -3,6 +3,7 @@ package search
 import (
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/emarifer/search-engine/internal/services"
@@ -19,7 +20,6 @@ func RunEngine(
 	startEngine := time.Now()
 	log.Println("🚀 Started search engine crawl…")
 
-	// defer log.Println("Search engine crawl has finished")
 	defer loggerEndEngine(startEngine)
 
 	// Get crawl settings from DB
@@ -45,20 +45,68 @@ func RunEngine(
 		return
 	}
 
+	/* === START OF WORKER POOLS IMPLEMENTATION === */
+
+	jobs := make(chan services.CrawledUrl, len(nextUrls))
+	results := make(chan CrawlData, len(nextUrls))
+
+	worker := func(wg *sync.WaitGroup) {
+		for job := range jobs {
+			results <- runCrawl(job.ID, job.Url)
+		}
+		wg.Done()
+	}
+
+	createWorkerPool := func(noOfWorkers int) {
+		var wg sync.WaitGroup
+		for i := 0; i < noOfWorkers; i++ {
+			wg.Add(1)
+			go worker(&wg)
+		}
+		wg.Wait()
+		close(results)
+	}
+
+	allocate := func() {
+		for _, job := range nextUrls {
+			jobs <- job
+		}
+		close(jobs)
+	}
+
 	newUrls := []services.CrawledUrl{}
 	testedTime := time.Now()
 
-	// Loop over the slice and run crawl on each url
-	for _, next := range nextUrls {
-		result := runCrawl(next.Url)
+	crawlResult := func(done chan bool) {
+		for result := range results {
+			// Check if the crawl was not successul
+			if !result.Success {
+				// Update row in database with the failed crawl
+				err := us.UpdateUrl(services.CrawledUrl{
+					ID:              result.ID,
+					Url:             result.Url,
+					Success:         false,
+					CrawlDuration:   result.CrawlBody.CrawlTime,
+					ResponseCode:    result.ResponseCode,
+					PageTitle:       result.CrawlBody.PageTitle,
+					PageDescription: result.CrawlBody.PageDescription,
+					Headings:        result.CrawlBody.Headings,
+					LastTested:      &testedTime,
+				})
+				if err != nil {
+					fmt.Printf(
+						"something went wrong updating a failed url: %s\n", err,
+					)
+				}
 
-		// Check if the crawl was not successul
-		if !result.Success {
-			// Update row in database with the failed crawl
+				continue
+			}
+
+			// Update a successful row in database
 			err := us.UpdateUrl(services.CrawledUrl{
-				ID:              next.ID,
-				Url:             next.Url,
-				Success:         false,
+				ID:              result.ID,
+				Url:             result.Url,
+				Success:         result.Success,
 				CrawlDuration:   result.CrawlBody.CrawlTime,
 				ResponseCode:    result.ResponseCode,
 				PageTitle:       result.CrawlBody.PageTitle,
@@ -68,36 +116,38 @@ func RunEngine(
 			})
 			if err != nil {
 				fmt.Printf(
-					"something went wrong updating a failed url: %s\n", err,
+					"something went wrong updating %s\n", result.Url,
 				)
 			}
 
-			continue
-		}
+			// Push the newly found external urls to a slice
+			for _, newUrl := range result.CrawlBody.Links.External {
+				newUrls = append(newUrls, services.CrawledUrl{Url: newUrl})
+			}
+		} // End of loop
 
-		// Update a successful row in database
-		err := us.UpdateUrl(services.CrawledUrl{
-			ID:              next.ID,
-			Url:             next.Url,
-			Success:         result.Success,
-			CrawlDuration:   result.CrawlBody.CrawlTime,
-			ResponseCode:    result.ResponseCode,
-			PageTitle:       result.CrawlBody.PageTitle,
-			PageDescription: result.CrawlBody.PageDescription,
-			Headings:        result.CrawlBody.Headings,
-			LastTested:      &testedTime,
-		})
-		if err != nil {
-			fmt.Printf(
-				"something went wrong updating %s\n", next.Url,
-			)
-		}
+		done <- true
+	}
 
-		// Push the newly found external urls to a slice
-		for _, newUrl := range result.CrawlBody.Links.External {
-			newUrls = append(newUrls, services.CrawledUrl{Url: newUrl})
-		}
-	} // End of loop
+	go allocate()
+
+	done := make(chan bool)
+
+	go crawlResult(done)
+
+	// This value [len(nextUrls)] will be the urls
+	// that will be crawled and corresponds,
+	// at most, to the value established in the `amout` field (Urls per hour).
+	// Setting this figure to very high values ​​(which will mean an equivalent
+	// number of workers) will not substantially improve
+	// performance above a certain amount.
+	fmt.Println("Number of urls that will be crawled:", len(nextUrls))
+	createWorkerPool(len(nextUrls))
+	<-done
+	// ↑ Execution control is blocked until the workers pool ↑
+	// finishes the assigned jobs.
+
+	/* === END OF WORKER POOLS IMPLEMENTATION === */
 
 	// Check if we should add the newly found urls to the database
 	if !sss.SearchSettings.AddNew {
@@ -163,3 +213,19 @@ func RunIndex(us *services.UrlServices, sis *services.SearchIndexServices) {
 		return
 	}
 }
+
+/* REFERENCES ABOUT WORKER POOLS:
+https://www.google.com/search?q=golang+worker+pool&oq=&aqs=chrome.1.35i39i362l8.25238j0j7&sourceid=chrome&ie=UTF-8
+https://dev.to/justlorain/go-how-to-write-a-worker-pool-1h3b
+https://golangbot.com/buffered-channels-worker-pools/
+
+"Lazy" strategy. SEE: https://github.com/alitto/pond?tab=readme-ov-file#resizing-strategies
+
+	fmt.Println("Number of urls that will be crawled:", len(nextUrls))
+	var noOfWorkers int
+	if len(nextUrls) <= runtime.NumCPU() {
+		noOfWorkers = len(nextUrls)
+	} else {
+		noOfWorkers = runtime.NumCPU() + (len(nextUrls) / runtime.NumCPU())
+	}
+*/

@@ -22,7 +22,7 @@ func CreateNewAuthToken(id, user string, isAdmin bool) (string, error) {
 		User:  user,
 		Admin: isAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			Issuer:    "https://github.com/emarifer",
 		},
 	}

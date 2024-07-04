@@ -81,7 +81,7 @@ func (ah *AuthHandler) loginPostHandler(c *fiber.Ctx) error {
 	cookie := fiber.Cookie{
 		Name:     "admin",
 		Value:    signedToken,
-		Expires:  time.Now().Add(1 * time.Minute),
+		Expires:  time.Now().Add(24 * time.Hour),
 		HTTPOnly: true, // Meant only for the server
 	}
 	c.Cookie(&cookie)

@@ -15,18 +15,16 @@ func StartCronJobs(
 ) {
 	c := cron.New()
 	// "0 * * * *" Run every hour
-	c.AddFunc("51 * * * *", func() { search.RunEngine(sss, us) }) // @every 120s
-	// "" Run every hour at 15 minutes past
-	c.AddFunc("52 * * * *", func() { search.RunIndex(us, sis) }) // @every 30s
+	c.AddFunc("0 * * * *", func() { search.RunEngine(sss, us) }) // @every 120s
+	// "05 * * * *" Run every hour at 5 minutes past
+	c.AddFunc("05 * * * *", func() { search.RunIndex(us, sis) }) // @every 30s
 
-	// c.AddFunc("53 * * * *", func() { search.RunEngine(sss, us) })
-	// c.AddFunc("54 * * * *", func() { search.RunIndex(us, sis) })
-
-	// c.AddFunc("55 * * * *", func() { search.RunEngine(sss, us) })
-	// c.AddFunc("56 * * * *", func() { search.RunIndex(us, sis) })
-
-	// c.AddFunc("57 * * * *", func() { search.RunEngine(sss, us) })
-	// c.AddFunc("58 * * * *", func() { search.RunIndex(us, sis) })
+	// c.AddFunc("29 * * * *", func() { search.RunEngine(sss, us) })
+	// c.AddFunc("30 * * * *", func() { search.RunIndex(us, sis) })
+	// c.AddFunc("31 * * * *", func() { search.RunEngine(sss, us) })
+	// c.AddFunc("32 * * * *", func() { search.RunIndex(us, sis) })
+	// c.AddFunc("33 * * * *", func() { search.RunEngine(sss, us) })
+	// c.AddFunc("34 * * * *", func() { search.RunIndex(us, sis) })
 
 	c.Start()
 	cronCount := len(c.Entries())
